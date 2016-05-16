@@ -2,6 +2,7 @@
 #define AS3933GEN
 
 #include "Arduino.h"
+#include "RingBuffer.h"
 
 //AS3933 data
 //f(RC) = f(carr)/4 = 125K/4 = 31.25Khz
@@ -18,9 +19,8 @@ class As3933Gen
 public:
   As3933Gen();
   void begin();
-  void generate(byte data);
-  bool isBusy();
-  void update();
+  bool generate(byte data);
+  bool push(byte value);
 private:
 };
 #endif

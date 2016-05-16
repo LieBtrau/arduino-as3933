@@ -1,3 +1,7 @@
+//Includes for libraries must be done in *.ino file
+#include "SPI.h"
+
+//Includes needed for this file
 #include <as3933gen.h>
 #include <as3933.h>
 
@@ -17,21 +21,26 @@
  */
 
 As3933Gen as;
-byte a=0;
 
 // the setup function runs once when you press reset or power the board
-void setup() 
+void setup()
 {
-  as.begin();
+    pinMode(11, OUTPUT);
+    as.push(3);
+    as.push(5);
+    as.begin();
 }
 
 // the loop function runs over and over again forever
-void loop() 
+void loop()
 {
-  if(!as.isBusy())
-  {
-    as.generate(a++);
-  }
+    while(!as.push(3));
+    while(!as.push(5));
+//    if(!as.isBusy())
+//    {
+//        as.generate(a);
+//        bitClear(PORTB,PB3);
+//    }
 }
 
 
