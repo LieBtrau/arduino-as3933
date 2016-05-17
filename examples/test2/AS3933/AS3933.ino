@@ -5,7 +5,8 @@
 #include <as3933gen.h>
 #include <as3933.h>
 
-As3933Gen as;
+byte pattern[]={0x12, 0x34};
+As3933Gen as(pattern);
 
 // the setup function runs once when you press reset or power the board
 void setup()

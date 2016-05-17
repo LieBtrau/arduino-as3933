@@ -6,13 +6,18 @@ static volatile byte bitShift;
 //Pingpong buffer variables
 static byte pingpongbuf[2];             //contains pingpong data
 static bool bufFull[2]={false,false};   //elements become true when respective pingpong element contains data
-static byte index;                      //index of the ping or pong element being active
+static byte bufIndex;                      //index of the ping or pong element being active
 
 
-As3933Gen::As3933Gen()
+As3933Gen::As3933Gen(byte *pattern16)
 {
-    shiftData=rfperiodCtr=index=0;
+    shiftData=rfperiodCtr=bufIndex=0;
     bitShift=0x80;
+    //Manchester encode
+    for(byte j=0;j<16;j++)
+    {
+        _pattern[(j>>2)^1] |= bitRead(pattern16[j>>3],j&7) ?  1<<(1+((j&3)<<1)) : 1<<((j&3)<<1);
+    }
 }
 
 void As3933Gen::begin()
@@ -47,8 +52,10 @@ void As3933Gen::begin()
 
 void As3933Gen::end()
 {
+#ifdef ARDUINO_AVR_PROTRINKET3
     bitClear(TIMSK1,TOIE1);
     TIMSK0=_timsk0;
+#endif
 }
 
 bool As3933Gen::push(byte value)
