@@ -19,8 +19,9 @@ class As3933Gen
 public:
   As3933Gen();
   void begin();
-  bool generate(byte data);
+  void end();
   bool push(byte value);
 private:
+  byte _timsk0;
 };
 #endif

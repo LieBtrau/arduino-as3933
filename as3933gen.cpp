@@ -1,17 +1,18 @@
 #include "as3933gen.h"
 
-static As3933Gen *activeGen = NULL;
-static byte shiftData=3;
-static byte rfperiodCtr=0;
-static volatile byte bitShift=0x80;
-static byte buf[2];
-static bool bufFull[2]={false,false};
-static byte index=0;
+static byte shiftData;
+static byte rfperiodCtr;
+static volatile byte bitShift;
+//Pingpong buffer variables
+static byte pingpongbuf[2];             //contains pingpong data
+static bool bufFull[2]={false,false};   //elements become true when respective pingpong element contains data
+static byte index;                      //index of the ping or pong element being active
 
 
 As3933Gen::As3933Gen()
 {
-    memset(buf,0x0,2);
+    shiftData=rfperiodCtr=index=0;
+    bitShift=0x80;
 }
 
 void As3933Gen::begin()
@@ -33,13 +34,21 @@ void As3933Gen::begin()
     OCR1B=47;
     //Enable Timer1 overflow interrupt
     bitSet(TIMSK1, TOIE1);
+    //Timer0 disable interrupts
+    _timsk0=TIMSK0;
+    TIMSK0=0;
     //Set clock source: No prescaling -> start timer
     bitSet(TCCR1B, CS10);
     bitClear(TCCR1B, CS11);
     bitClear(TCCR1B, CS12);
     sei();
 #endif
-    activeGen=this;
+}
+
+void As3933Gen::end()
+{
+    bitClear(TIMSK1,TOIE1);
+    TIMSK0=_timsk0;
 }
 
 bool As3933Gen::push(byte value)
@@ -47,52 +56,47 @@ bool As3933Gen::push(byte value)
     if(!bufFull[0])
     {
         bufFull[0]=true;
-        buf[0]=value;
+        pingpongbuf[0]=value;
         return true;
     }
     if(!bufFull[1])
     {
         bufFull[1]=true;
-        buf[1]=value;
+        pingpongbuf[1]=value;
         return true;
     }
     return false;
 }
 
 
-//void As3933Gen::update()
-//{
-//    //  if (!rfperiodCtr++)
-//    //  {
-//    //  }
-//    //  rfperiodCtr &= 0x7; //todo, should be 0x1F // (#bits/RF period) - 1
-//}
-
-
-
 #ifdef ARDUINO_AVR_PROTRINKET3
 ISR(TIMER1_OVF_vect)
 {
-    bitSet(PORTB,PB3);
-    if (shiftData & bitShift)
+    if (!rfperiodCtr++)
     {
-        bitSet(DDRB, DDB2);
-    }
-    else
-    {
-        bitClear(DDRB, DDB2);
-    }
-    bitShift >>= 1;
-    if(!bitShift)
-    {
-        bufFull[index]=false;
-        index ^= 0x01;
-        if(bufFull[index])
+        if (shiftData & bitShift)
         {
-            bitShift=0x80;
-            shiftData=buf[index];
+            bitSet(DDRB, DDB2);
+        }
+        else
+        {
+            bitClear(DDRB, DDB2);
+        }
+        bitShift >>= 1;
+        if(!bitShift)
+        {
+            //Byte completely shifted out.
+            bufFull[index]=false;
+            //Switch between ping & pong
+            index ^= 0x01;
+            //Shift out a new byte if available
+            if(bufFull[index])
+            {
+                bitShift=0x80;
+                shiftData=pingpongbuf[index];
+            }
         }
     }
-    bitClear(PORTB,PB3);
+    rfperiodCtr &= 0x1F;// = (#bits per RF period) - 1
 }
 #endif
