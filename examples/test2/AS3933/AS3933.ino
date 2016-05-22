@@ -18,8 +18,6 @@ void setup()
 // the loop function runs over and over again forever
 void loop()
 {
-    while(!as.push(0xAA));
-    while(!as.push(0x55));
 //    if(!as.isBusy())
 //    {
 //        as.generate(a);
