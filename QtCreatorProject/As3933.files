@@ -3,3 +3,5 @@
 ../as3933gen.cpp
 ../as3933gen.h
 ../examples/test2/AS3933/AS3933.ino
+../examples/test1/test1.ino
+../examples/test2/test2.ino
