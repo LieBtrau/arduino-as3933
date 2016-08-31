@@ -16,8 +16,6 @@ void As3933Gen::begin(byte *pattern16)
     setData(pattern16);
     shiftData=rfperiodCtr=bufIndex=isDone=0;
 #ifdef ARDUINO_ARCH_AVR
-    //Set OC1B pin as output (PORTB.2)
-    pinMode(10, OUTPUT);
     //Waveform generation mode 15: Fast PWM with top at OCR1A
     bitSet(TCCR1B, WGM13);
     bitSet(TCCR1B, WGM12);
@@ -28,7 +26,7 @@ void As3933Gen::begin(byte *pattern16)
     bitSet(TCCR1A, COM1B0);
     OCR1A=OCR1AVAL;
     //Set duty cycle to 50%
-    OCR1B=OCR1AVAL>>1;
+    OCR1B=OCR1AVAL >> 1;
     //Enable Timer1 overflow interrupt
     bitSet(TIMSK1, TOIE1);
     //Timer0 disable interrupts
