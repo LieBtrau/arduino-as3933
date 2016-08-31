@@ -14,6 +14,7 @@ void As3933::begin()
     reset();
 }
 
+//Calibrate the antennas by changing the internal C's of the AS3933.
 void As3933::calAntenna(long freq)
 {
     /*
@@ -31,8 +32,7 @@ void As3933::calAntenna(long freq)
     byte r16 = read(16);
     r16 &= 0xF8;
     write(16, r16);
-    write(CLEAR_WAKE);
-    write(RESET_RSSI);
+    reset();
 }
 
 bool As3933::calRcOscillatorSelf()
