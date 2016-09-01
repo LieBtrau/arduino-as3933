@@ -1,3 +1,14 @@
+/* AS3933 functionality
+ * Connections:
+ * AS3933       ProTrinket 3V
+ * 1            10
+ * 2            13
+ * 3            11
+ * 4            12
+ * 5            3V
+ * 6            GND
+ * 15           5
+ */
 #ifndef AS3933_H
 #define AS3933_H
 
@@ -6,11 +17,11 @@
 class As3933
 {
 public:
-    As3933(SPIClass &spi, byte ss, byte dat);
-    void begin();
+    As3933(SPIClass &spi, byte ss);
+    bool begin();
     bool setCorrelator(bool bEnable);
-    void calAntenna(long freq);
-    bool calRcOscillatorSelf();
+    unsigned long antennaTuning(byte antennaNr, unsigned long freqSoll);
+    bool doRcOscSelfCalib();
     void reset();
 private:
     static const byte RC_CAL_OK=7;//R14,7
