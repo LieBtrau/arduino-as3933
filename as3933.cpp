@@ -17,6 +17,7 @@ bool As3933::begin()
     _spiSettings=SPISettings(2000000, MSBFIRST, SPI_MODE1);
     _spi->begin();
     reset();
+    doOutputClockGeneratorFrequency(false);
     //use default register values to check if communication is OK.
     //error in datasheet: default values of R5 and R6 are swapped
     return (read(5) == 0x69) && (read(6) == 0x96);
@@ -31,7 +32,7 @@ bool As3933::begin()
  */
 unsigned long As3933::antennaTuning(byte antennaNr, unsigned long freqSoll)
 {
-    byte r16=0;
+    byte r16=read(16);
     unsigned long freqIst;
     byte tuningVal=0;
 
@@ -39,6 +40,7 @@ unsigned long As3933::antennaTuning(byte antennaNr, unsigned long freqSoll)
     Serial.print("Tuning antenna : LF");Serial.println(antennaNr, DEC);
 #endif
     bitSet(r16,antennaNr-1);//enable LC-output on DAT-pin
+    write(16, r16);
     for(char bit=4;bit>-1;bit--)
     {
 #ifdef DEBUG
@@ -60,6 +62,7 @@ unsigned long As3933::antennaTuning(byte antennaNr, unsigned long freqSoll)
         }
     }
     bitClear(r16,antennaNr-1);
+    write(16, r16);
     reset();
     return freqIst;
 }
@@ -80,6 +83,25 @@ bool As3933::doRcOscSelfCalib()
     byte r14=read(14);
     return bitRead(r14, RC_CAL_OK);
 }
+
+//It is possible to display the frequency of the clock generator on the CL_DAT pin writing R2<3:2>=11 and R16<7>=1.
+void As3933::doOutputClockGeneratorFrequency(bool bOutputEnabled)
+{
+    byte r2=read(2);
+    byte r16=read(16);
+    if(bOutputEnabled)
+    {
+        r2|=DISPLAY_CLK;
+        bitSet(r16, CLOCK_GEN_DIS);
+    }else
+    {
+        r2&=~DISPLAY_CLK;
+        bitClear(r16, CLOCK_GEN_DIS);
+    }
+    write(2,r2);
+    write(16,r16);
+}
+
 
 void As3933::reset()
 {

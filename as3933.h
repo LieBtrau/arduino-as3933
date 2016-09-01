@@ -22,11 +22,14 @@ public:
     bool setCorrelator(bool bEnable);
     unsigned long antennaTuning(byte antennaNr, unsigned long freqSoll);
     bool doRcOscSelfCalib();
+    void doOutputClockGeneratorFrequency(bool bOutputEnabled);
     void reset();
 private:
-    static const byte RC_CAL_OK=7;//R14,7
-    static const byte EN_WPAT=1;//R1,1
-    static const byte EN_XTAL=0;//R1,0
+    const byte DISPLAY_CLK=0x0C;//R2<3:2>
+    const byte CLOCK_GEN_DIS=7;//R16.7
+    const byte RC_CAL_OK=7;//R14,7
+    const byte EN_WPAT=1;//R1,1
+    const byte EN_XTAL=0;//R1,0
     typedef enum
     {
         CLEAR_WAKE=0,

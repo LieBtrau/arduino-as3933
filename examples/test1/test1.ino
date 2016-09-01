@@ -31,6 +31,10 @@ void setup()
         Serial.println("RC-oscillator not correctly calibrated.");
     }
     Serial.println("RC-oscillator OK");
+    //Measure clock generator frequency on CL_DAT pin.
+    //For 125KHz carrier frequency, the clock generator frequency will be 125KHz/4 = 31.25KHz,
+    //See AS3933 datasheet p.49
+    asTag.doOutputClockGeneratorFrequency(true);
 }
 
 // the loop function runs over and over again forever
