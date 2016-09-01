@@ -19,6 +19,7 @@ void setup()
     if(!asTag.begin())
     {
         Serial.println("Communication with AS3933 fails.");
+        return;
     }
     unsigned long ant1freqOsc= asTag.antennaTuning(1,125000);
     if(ant1freqOsc<124000 || ant1freqOsc>126000)
@@ -26,9 +27,23 @@ void setup()
         Serial.println("Calibration for antenna 1 fails");
         return;
     }
+    unsigned long ant2freqOsc= asTag.antennaTuning(2,125000);
+    if(ant2freqOsc<124000 || ant2freqOsc>126000)
+    {
+        Serial.println("Calibration for antenna 2 fails");
+        return;
+    }
+    unsigned long ant3freqOsc= asTag.antennaTuning(3,125000);
+    if(ant3freqOsc<124000 || ant3freqOsc>126000)
+    {
+        Serial.println("Calibration for antenna 3 fails");
+        return;
+    }
+
     if(!asTag.doRcOscSelfCalib())
     {
         Serial.println("RC-oscillator not correctly calibrated.");
+        return;
     }
     Serial.println("RC-oscillator OK");
     //Measure clock generator frequency on CL_DAT pin.

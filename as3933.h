@@ -8,6 +8,8 @@
  * 5            3V
  * 6            GND
  * 15           5
+ *
+ * TODO: add https://github.com/PaulStoffregen/FreqCount as submodule.
  */
 #ifndef AS3933_H
 #define AS3933_H
@@ -34,6 +36,7 @@ private:
     {
         CLEAR_WAKE=0,
         RESET_RSSI=1,
+        PRESET_DEFAULT=2,
         Calib_RCO_LC=5
     }DIRECT_CMD;
     SPIClass* _spi;

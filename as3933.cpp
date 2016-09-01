@@ -17,10 +17,18 @@ bool As3933::begin()
     _spiSettings=SPISettings(2000000, MSBFIRST, SPI_MODE1);
     _spi->begin();
     reset();
-    doOutputClockGeneratorFrequency(false);
     //use default register values to check if communication is OK.
     //error in datasheet: default values of R5 and R6 are swapped
-    return (read(5) == 0x69) && (read(6) == 0x96);
+    byte r5=read(5);
+    byte r6=read(6);
+    if((r5!=0x69) || (r6!= 0x96))
+    {
+        Serial.println("Reading data from AS3933 fails: ");
+        Serial.print("r5: "); Serial.println(r5, HEX);
+        Serial.print("r6: "); Serial.println(r6, HEX);
+        return false;
+    }
+    return true;
 }
 
 /* Calibrate the antennas by adjusting the tuning caps of the AS3933.
@@ -35,7 +43,6 @@ unsigned long As3933::antennaTuning(byte antennaNr, unsigned long freqSoll)
     byte r16=read(16);
     unsigned long freqIst;
     byte tuningVal=0;
-
 #ifdef DEBUG
     Serial.print("Tuning antenna : LF");Serial.println(antennaNr, DEC);
 #endif
@@ -63,7 +70,6 @@ unsigned long As3933::antennaTuning(byte antennaNr, unsigned long freqSoll)
     }
     bitClear(r16,antennaNr-1);
     write(16, r16);
-    reset();
     return freqIst;
 }
 
@@ -103,10 +109,10 @@ void As3933::doOutputClockGeneratorFrequency(bool bOutputEnabled)
 }
 
 
+//Reset all AS3933 registers to default values
 void As3933::reset()
 {
-    write(CLEAR_WAKE);
-    write(RESET_RSSI);
+    write(PRESET_DEFAULT);
 }
 
 bool As3933::setCorrelator(bool bEnable)
