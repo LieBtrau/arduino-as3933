@@ -19,19 +19,63 @@
 class As3933
 {
 public:
+    typedef enum
+    {
+        LM_STANDARD,
+        LM_SCANNING,
+        LM_ON_OFF
+    }LISTENING_MODE;
+    typedef enum
+    {
+        OO_1ms,
+        OO_2ms,
+        OO_4ms,
+        OO_8ms
+    }ON_OFF_TIME;
+    typedef enum
+    {
+        FDT_NONE,
+        FDT_SMALL,
+        FDT_AVERAGE,
+        FDT_BIG
+    }FREQ_DET_TOL;
+    typedef enum
+    {
+        AGC_DOWNONLY,
+        AGC_UP_DOWN
+    }AGC_MODE;
+    typedef enum
+    {
+        GR_NONE,
+        GR_MIN4DB,
+        GR_MIN8DB,
+        GR_MIN12DB,
+        GR_MIN16DB,
+        GR_MIN20DB,
+        GR_MIN24DB
+    }GAIN_REDUCTION;
+    typedef enum
+    {
+        DR_NONE,
+        DR_1K,
+        DR_3K,
+        DR_9K,
+        DR_27K
+    }DAMP_RESISTOR;
     As3933(SPIClass &spi, byte ss);
-    bool begin();
+    bool begin(unsigned long freq);
     bool setCorrelator(bool bEnable);
-    unsigned long antennaTuning(byte antennaNr, unsigned long freqSoll);
+    unsigned long antennaTuning(byte antennaNr);
     bool doRcOscSelfCalib();
     void doOutputClockGeneratorFrequency(bool bOutputEnabled);
+    bool setNrOfActiveAntennas(byte number);
+    bool setListeningMode(LISTENING_MODE lm);
+    bool setListeningModeOnOffTime(ON_OFF_TIME oot);
+    bool setFrequencyDetectionTolerance(FREQ_DET_TOL fdt);
+    bool setAgc(AGC_MODE m, GAIN_REDUCTION gr);
+    bool setAntennaDamper(DAMP_RESISTOR dr);
     void reset();
 private:
-    const byte DISPLAY_CLK=0x0C;//R2<3:2>
-    const byte CLOCK_GEN_DIS=7;//R16.7
-    const byte RC_CAL_OK=7;//R14,7
-    const byte EN_WPAT=1;//R1,1
-    const byte EN_XTAL=0;//R1,0
     typedef enum
     {
         CLEAR_WAKE=0,
@@ -39,13 +83,41 @@ private:
         PRESET_DEFAULT=2,
         Calib_RCO_LC=5
     }DIRECT_CMD;
+    void write(DIRECT_CMD directCmd);
+    void write(byte reg, byte data);
+    byte read(byte reg);
+    bool setOperatingFrequencyRange();
+    const byte CLOCK_GEN_DIS=7;//R16.7
+    const byte BAND_SEL2=7;//R8.7
+    const byte BAND_SEL1=6;//R8.6
+    const byte BAND_SEL0=5;//R8.5
+    const byte RC_CAL_OK=7;//R14,7
+    const byte T_OFF1=7;//R4.7
+    const byte T_OFF0=6;//R4.6
+    const byte D_RES_1=5;//R4.5
+    const byte D_RES_0=4;//R4.4
+    const byte GR_3=3;//R4.3
+    const byte GR_2=2;//R4.2
+    const byte GR_1=1;//R4.1
+    const byte GR_0=0;//R4.0
+    const byte DISPLAY_CLK=0x0C;//R2<3:2>
+    const byte S_WU1_1=1;//R2.1
+    const byte S_WU1_0=0;//R2.0
+    const byte AGC_UD=5;//R1.5
+    const byte ATT_ON=4;//R1.4
+    const byte EN_WPAT=1;//R1,1
+    const byte EN_XTAL=0;//R1,0
+    const byte ON_OFF=5;//R0,5
+    const byte MUX_123=4;//R0,4
+    const byte EN_A2=3;//R0,3
+    const byte EN_A3=2;//R0,2
+    const byte EN_A1=1;//R0,1
     SPIClass* _spi;
     SPISettings _spiSettings;
     byte _ss;
     byte _dat;
-    void write(DIRECT_CMD directCmd);
-    void write(byte reg, byte data);
-    byte read(byte reg);
+    unsigned long _freq;
+    LISTENING_MODE _lm;
 };
 
 #endif // AS3933_H
