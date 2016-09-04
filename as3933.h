@@ -62,9 +62,35 @@ public:
         DR_9K,
         DR_27K
     }DAMP_RESISTOR;
+    typedef enum
+    {
+        SR_4096,
+        SR_2184,
+        SR_1490,
+        SR_1130,
+        SR_910,
+        SR_762,
+        SR_655,
+        SR_512
+    }SYMBOL_RATE;
+    typedef enum
+    {
+        PR_800us,
+        PR_1150us,
+        PR_1550us,
+        PR_1900us,
+        PR_2300us,
+        PR_2650us,
+        PR_3000us,
+        PR_3500us
+    }PREAMBLE;
+    typedef enum
+    {
+        WK_FREQ_DET_ONLY,
+        WK_SINGLE_PATTERN
+    }WAKEUP;
     As3933(SPIClass &spi, byte ss);
     bool begin(unsigned long freq);
-    bool setCorrelator(bool bEnable);
     unsigned long antennaTuning(byte antennaNr);
     bool doRcOscSelfCalib();
     void doOutputClockGeneratorFrequency(bool bOutputEnabled);
@@ -74,6 +100,11 @@ public:
     bool setFrequencyDetectionTolerance(FREQ_DET_TOL fdt);
     bool setAgc(AGC_MODE m, GAIN_REDUCTION gr);
     bool setAntennaDamper(DAMP_RESISTOR dr);
+    bool setSymbolRate(SYMBOL_RATE sr);
+    bool setPreambleLength(PREAMBLE pr);
+    bool setBitDuration(byte rcRatio);
+    bool setWakeUpProtocol(WAKEUP wk);
+    bool setWakeUpPattern(byte* pattern16);
     void reset();
 private:
     typedef enum
@@ -91,6 +122,7 @@ private:
     const byte BAND_SEL2=7;//R8.7
     const byte BAND_SEL1=6;//R8.6
     const byte BAND_SEL0=5;//R8.5
+    const byte T_HBIT=0x1F;//R7<4:0>
     const byte RC_CAL_OK=7;//R14,7
     const byte T_OFF1=7;//R4.7
     const byte T_OFF0=6;//R4.6
@@ -100,13 +132,21 @@ private:
     const byte GR_2=2;//R4.2
     const byte GR_1=1;//R4.1
     const byte GR_0=0;//R4.0
+    const byte FS_SCL_2=5;//R3.5
+    const byte FS_SCL_1=4;//R3.4
+    const byte FS_SCL_0=3;//R3.3
+    const byte FS_ENV_2=2;//R3.2
+    const byte FS_ENV_1=1;//R3.1
+    const byte FS_ENV_0=0;//R3.0
     const byte DISPLAY_CLK=0x0C;//R2<3:2>
     const byte S_WU1_1=1;//R2.1
     const byte S_WU1_0=0;//R2.0
     const byte AGC_UD=5;//R1.5
     const byte ATT_ON=4;//R1.4
+    const byte EN_PAT2=2;//R1.2
     const byte EN_WPAT=1;//R1,1
     const byte EN_XTAL=0;//R1,0
+    const byte PAT32=7;//R0.7
     const byte ON_OFF=5;//R0,5
     const byte MUX_123=4;//R0,4
     const byte EN_A2=3;//R0,3
@@ -118,6 +158,7 @@ private:
     byte _dat;
     unsigned long _freq;
     LISTENING_MODE _lm;
+    bool _bCorrelatorEnabled;
 };
 
 #endif // AS3933_H

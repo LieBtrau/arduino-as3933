@@ -53,8 +53,8 @@ void As3933Gen::end()
 void As3933Gen::setData(byte* pattern16)
 {
     //Carrier burst = unmodulated carrier
-    //  Minimum carrier burst length in scanning mode = 80 RC periods + 16 RF periods = 2560us + 128us = 2688us
-    //  Maximum carrier burst length = 155 RC periods = 4960us
+    //  Minimum carrier burst length in scanning mode (datasheet AS3933 fig.53) = 80 RC periods + 16 RF periods = 2560us + 128us = 2688us
+    //  Maximum carrier burst length = 155 RC periods (datasheet AS3933 p.44) = 4960us
     //  => Carrier burst length = 3840us = 15 bits = 15*8 RC periods = 120 RC periods
     dataHalfBits[0]=0xFF;
     dataHalfBits[1]=0xFE;
@@ -63,6 +63,7 @@ void As3933Gen::setData(byte* pattern16)
     //  => 1bit = 0, implemented as last bit of carrier burst
 
     //Preamble = 100% modulated carrier 10101...010
+    //  See datasheet AS3933, p.46
     //  Minimum preamble length = 6 bits (i.e. 101010)
     //  Maximum preample length = 14 bits
     //  => Preamble = 8bits

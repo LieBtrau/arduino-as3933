@@ -36,6 +36,126 @@ bool As3933::begin(unsigned long freq)
     return true;
 }
 
+//Set number of RC-periods per bit
+bool As3933::setBitDuration(byte rcRatio)
+{
+    if(--rcRatio>0x1F)
+    {
+        return false;
+    }
+    byte r7=read(7);
+    r7&=0xE0;
+    r7|=rcRatio;
+    write(7,r7);
+    return true;
+}
+
+//Set slow envelope detector
+bool As3933::setPreambleLength(PREAMBLE pr)
+{
+    byte r3=read(3);
+    switch(pr)
+    {
+    case PR_800us:
+        bitClear(r3,FS_SCL_0);
+        bitClear(r3,FS_SCL_1);
+        bitClear(r3,FS_SCL_2);
+        break;
+    case PR_1150us:
+        bitSet(r3,FS_SCL_0);
+        bitClear(r3,FS_SCL_1);
+        bitClear(r3,FS_SCL_2);
+        break;
+    case PR_1550us:
+        bitClear(r3,FS_SCL_0);
+        bitSet(r3,FS_SCL_1);
+        bitClear(r3,FS_SCL_2);
+        break;
+    case PR_1900us:
+        bitSet(r3,FS_SCL_0);
+        bitSet(r3,FS_SCL_1);
+        bitClear(r3,FS_SCL_2);
+        break;
+    case PR_2300us:
+        bitClear(r3,FS_SCL_0);
+        bitClear(r3,FS_SCL_1);
+        bitSet(r3,FS_SCL_2);
+        break;
+    case PR_2650us:
+        bitSet(r3,FS_SCL_0);
+        bitClear(r3,FS_SCL_1);
+        bitSet(r3,FS_SCL_2);
+        break;
+    case PR_3000us:
+        bitClear(r3,FS_SCL_0);
+        bitSet(r3,FS_SCL_1);
+        bitSet(r3,FS_SCL_2);
+        break;
+    case PR_3500us:
+        bitSet(r3,FS_SCL_0);
+        bitSet(r3,FS_SCL_1);
+        bitSet(r3,FS_SCL_2);
+        break;
+    default:
+        return false;
+    }
+    write(3,r3);
+    return true;
+}
+
+//Configure the fast envelope detector
+bool As3933::setSymbolRate(SYMBOL_RATE sr)
+{
+    byte r3=read(3);
+    switch (sr)
+    {
+    case SR_4096:
+        bitClear(r3,FS_ENV_0);
+        bitClear(r3,FS_ENV_1);
+        bitClear(r3,FS_ENV_2);
+        break;
+    case SR_2184:
+        bitSet(r3,FS_ENV_0);
+        bitClear(r3,FS_ENV_1);
+        bitClear(r3,FS_ENV_2);
+        break;
+    case SR_1490:
+        bitClear(r3,FS_ENV_0);
+        bitSet(r3,FS_ENV_1);
+        bitClear(r3,FS_ENV_2);
+        break;
+    case SR_1130:
+        bitSet(r3,FS_ENV_0);
+        bitSet(r3,FS_ENV_1);
+        bitClear(r3,FS_ENV_2);
+        break;
+    case SR_910:
+        bitClear(r3,FS_ENV_0);
+        bitClear(r3,FS_ENV_1);
+        bitSet(r3,FS_ENV_2);
+        break;
+    case SR_762:
+        bitSet(r3,FS_ENV_0);
+        bitClear(r3,FS_ENV_1);
+        bitSet(r3,FS_ENV_2);
+        break;
+    case SR_655:
+        bitClear(r3,FS_ENV_0);
+        bitSet(r3,FS_ENV_1);
+        bitSet(r3,FS_ENV_2);
+        break;
+    case SR_512:
+        bitSet(r3,FS_ENV_0);
+        bitSet(r3,FS_ENV_1);
+        bitSet(r3,FS_ENV_2);
+        break;
+    default:
+        return false;
+    }
+    write(3,r3);
+    return true;
+}
+
 bool As3933::setAntennaDamper(DAMP_RESISTOR dr)
 {
     byte r1=read(1);
@@ -373,25 +493,45 @@ bool As3933::setOperatingFrequencyRange()
 void As3933::reset()
 {
     write(PRESET_DEFAULT);
+    _bCorrelatorEnabled=true;
 }
 
-bool As3933::setCorrelator(bool bEnable)
+bool As3933::setWakeUpProtocol(WAKEUP wk)
 {
-    byte a=read(0x1);
-    if(bEnable)
+    byte r1=read(0x1);
+    switch(wk)
     {
-        bitSet(a,EN_WPAT);
-    }else
-    {
-        bitClear(a,EN_WPAT);
+    case WK_FREQ_DET_ONLY:
+        bitClear(r1,EN_WPAT);
+        bitClear(r1,EN_PAT2);
+        _bCorrelatorEnabled=false;
+        break;
+    case WK_SINGLE_PATTERN:
+        bitSet(r1,EN_WPAT);
+        bitClear(r1,EN_PAT2);
+        _bCorrelatorEnabled=true;
+        break;
+    default:
+        return false;
     }
-    write(0x1,a);
+    write(0x1,r1);
+    return true;
 }
 
-//Remark that the AS3933 datasheet swaps the definition of bits & symbols
-//9 header bits         -> 9*2*32 = 576 periods -> 4.6ms -> set preamble length to 3.5ms
-//2 symbols/bit
-//32 periods/symbol     -> standard for EM4102, but it's hard to do on a slow AVR
+bool As3933::setWakeUpPattern(byte *pattern16)
+{
+    if(!_bCorrelatorEnabled)
+    {
+        return false;
+    }
+    //The pattern passed into this function is symbol representation.  It corresponds to 32bits in Manchester.
+    byte r0=read(0);
+    bitSet(r0, PAT32);
+    write(r0);
+    write(5, pattern16[0]);
+    write(6, pattern16[1]);
+    return true;
+}
 
 void As3933::write(byte reg, byte data) {
     digitalWrite(_ss, HIGH);
@@ -410,7 +550,6 @@ void As3933::write(DIRECT_CMD directCmd)
     _spi->endTransaction();
     digitalWrite(_ss, LOW);
 }
-
 
 byte As3933::read(byte reg) {
     byte retVal;
