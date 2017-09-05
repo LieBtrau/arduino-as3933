@@ -50,6 +50,59 @@ bool As3933::setBitDuration(byte rcRatio)
     return true;
 }
 
+// Set timeout to return to listening mode
+bool As3933::setTimeout(TIMEOUT to)
+{
+    byte r7=read(7);
+    switch(to)
+    {
+    case TO_0ms:
+        bitClear(r7, T_OUT_2);
+        bitClear(r7, T_OUT_1);
+        bitClear(r7, T_OUT_0);
+        break;
+    case TO_50ms:
+        bitClear(r7, T_OUT_2);
+        bitClear(r7, T_OUT_1);
+        bitSet(r7, T_OUT_0);
+        break;
+    case TO_100ms:
+        bitClear(r7, T_OUT_2);
+        bitSet(r7, T_OUT_1);
+        bitClear(r7, T_OUT_0);
+        break;
+    case TO_150ms:
+        bitClear(r7, T_OUT_2);
+        bitSet(r7, T_OUT_1);
+        bitSet(r7, T_OUT_0);
+        break;
+    case TO_200ms:
+        bitSet(r7, T_OUT_2);
+        bitClear(r7, T_OUT_1);
+        bitClear(r7, T_OUT_0);
+        break;
+    case TO_250ms:
+        bitSet(r7, T_OUT_2);
+        bitClear(r7, T_OUT_1);
+        bitSet(r7, T_OUT_0);
+        break;
+    case TO_300ms:
+        bitSet(r7, T_OUT_2);
+        bitSet(r7, T_OUT_1);
+        bitClear(r7, T_OUT_0);
+        break;
+    case TO_350ms:
+        bitSet(r7, T_OUT_2);
+        bitSet(r7, T_OUT_1);
+        bitSet(r7, T_OUT_0);
+        break;
+    default:
+        return false;
+    }
+    write(7, r7);
+    return true;
+}
+
 //Set slow envelope detector
 bool As3933::setPreambleLength(PREAMBLE pr)
 {
