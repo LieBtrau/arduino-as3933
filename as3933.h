@@ -75,6 +75,17 @@ public:
     }SYMBOL_RATE;
     typedef enum
     {
+        TO_0ms,
+        TO_50ms,
+        TO_100ms,
+        TO_150ms,
+        TO_200ms,
+        TO_250ms,
+        TO_300ms,
+        TO_350ms
+    }TIMEOUT;
+    typedef enum
+    {
         PR_800us,
         PR_1150us,
         PR_1550us,
@@ -102,27 +113,34 @@ public:
     bool setAntennaDamper(DAMP_RESISTOR dr);
     bool setSymbolRate(SYMBOL_RATE sr);
     bool setPreambleLength(PREAMBLE pr);
+    bool setTimeout(TIMEOUT to);
     bool setBitDuration(byte rcRatio);
     bool setWakeUpProtocol(WAKEUP wk);
     bool setWakeUpPattern(byte* pattern16);
     void reset();
+    void clear_wake();
+    void write(byte reg, byte data);
+    byte read(byte reg);
 private:
     typedef enum
     {
         CLEAR_WAKE=0,
         RESET_RSSI=1,
-        PRESET_DEFAULT=2,
+        Calib_RCosc=2,
+        clear_false=3,
+        PRESET_DEFAULT=4,
         Calib_RCO_LC=5
     }DIRECT_CMD;
     void write(DIRECT_CMD directCmd);
-    void write(byte reg, byte data);
-    byte read(byte reg);
     bool setOperatingFrequencyRange();
     const byte CLOCK_GEN_DIS=7;//R16.7
     const byte BAND_SEL2=7;//R8.7
     const byte BAND_SEL1=6;//R8.6
     const byte BAND_SEL0=5;//R8.5
     const byte T_HBIT=0x1F;//R7<4:0>
+    const byte T_OUT_2=7;//R7.7
+    const byte T_OUT_1=6;//R7.6
+    const byte T_OUT_0=5;//R7.5
     const byte RC_CAL_OK=7;//R14,7
     const byte T_OFF1=7;//R4.7
     const byte T_OFF0=6;//R4.6

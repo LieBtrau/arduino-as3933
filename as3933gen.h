@@ -16,9 +16,17 @@ const byte RF_PERIOD_CTR=31; // = (#bits per RF period) - 1
 #ifdef ARDUINO_AVR_PROTRINKET3FTDI || defined(ARDUINO_AVR_PROTRINKET3)
     //Set compare match register for 125KHz output frequency = F_CPU / 125K - 1 = 12M / 125K - 1 (Pro Trinket 3V)
     const byte OCR1AVAL=95;
-#elif defined(ARDUINO_AVR_UNO)
+#elif defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO)
     //Set compare match register for 125KHz output frequency = F_CPU / 125K - 1 = 16M / 125K - 1 (Pro Trinket 3V)
     const byte OCR1AVAL=127;
+#elif defined (__AVR_ATmega168__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__)
+    // ATmega328P max clock of 20MHz, OCR1A/B are 16-bit registers
+    #warning Your specific board has not been tested but should work
+    const byte OCR1AVAL = F_CPU / 125000 - 1;
+#elif defined(TCCR1A) && defined(COM1A1) && defined(COM1B1)
+    // Check for timer1, channel A & B
+    #warning Your board has not been tested yet and may not work!
+    const byte OCR1AVAL = F_CPU / 125000 - 1;
 #else
     #error Your board is not supported yet
 #endif

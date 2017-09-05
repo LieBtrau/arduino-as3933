@@ -18,7 +18,6 @@ bool As3933::begin(unsigned long freq)
     _spi->begin();
     reset();
     //use default register values to check if communication is OK.
-    //error in datasheet: default values of R5 and R6 are swapped
     byte r5=read(5);
     byte r6=read(6);
     if((r5!=0x69) || (r6!= 0x96))
@@ -36,7 +35,7 @@ bool As3933::begin(unsigned long freq)
     return true;
 }
 
-//Set number of RC-periods per bit
+// Set number of RC-periods per bit
 bool As3933::setBitDuration(byte rcRatio)
 {
     if(--rcRatio>0x1F)
@@ -47,6 +46,59 @@ bool As3933::setBitDuration(byte rcRatio)
     r7&=0xE0;
     r7|=rcRatio;
     write(7,r7);
+    return true;
+}
+
+// Set timeout to return to listening mode
+bool As3933::setTimeout(TIMEOUT to)
+{
+    byte r7=read(7);
+    switch(to)
+    {
+    case TO_0ms:
+        bitClear(r7, T_OUT_2);
+        bitClear(r7, T_OUT_1);
+        bitClear(r7, T_OUT_0);
+        break;
+    case TO_50ms:
+        bitClear(r7, T_OUT_2);
+        bitClear(r7, T_OUT_1);
+        bitSet(r7, T_OUT_0);
+        break;
+    case TO_100ms:
+        bitClear(r7, T_OUT_2);
+        bitSet(r7, T_OUT_1);
+        bitClear(r7, T_OUT_0);
+        break;
+    case TO_150ms:
+        bitClear(r7, T_OUT_2);
+        bitSet(r7, T_OUT_1);
+        bitSet(r7, T_OUT_0);
+        break;
+    case TO_200ms:
+        bitSet(r7, T_OUT_2);
+        bitClear(r7, T_OUT_1);
+        bitClear(r7, T_OUT_0);
+        break;
+    case TO_250ms:
+        bitSet(r7, T_OUT_2);
+        bitClear(r7, T_OUT_1);
+        bitSet(r7, T_OUT_0);
+        break;
+    case TO_300ms:
+        bitSet(r7, T_OUT_2);
+        bitSet(r7, T_OUT_1);
+        bitClear(r7, T_OUT_0);
+        break;
+    case TO_350ms:
+        bitSet(r7, T_OUT_2);
+        bitSet(r7, T_OUT_1);
+        bitSet(r7, T_OUT_0);
+        break;
+    default:
+        return false;
+    }
+    write(7, r7);
     return true;
 }
 
@@ -496,6 +548,12 @@ void As3933::reset()
     _bCorrelatorEnabled=true;
 }
 
+// Clear wake state of chip / go back to listening mode
+void As3933::clear_wake()
+{
+    write(CLEAR_WAKE);
+}
+
 bool As3933::setWakeUpProtocol(WAKEUP wk)
 {
     byte r1=read(0x1);
@@ -527,7 +585,7 @@ bool As3933::setWakeUpPattern(byte *pattern16)
     //The pattern passed into this function is symbol representation.  It corresponds to 32bits in Manchester.
     byte r0=read(0);
     bitSet(r0, PAT32);
-    write(r0);
+    write(0, r0);
     write(5, pattern16[0]);
     write(6, pattern16[1]);
     return true;
