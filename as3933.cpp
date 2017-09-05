@@ -37,7 +37,6 @@ bool As3933::begin(unsigned long freq)
 }
 
 // Set number of RC-periods per bit
-// rcRatio+1 is bit duration in clock generator periods (p28)
 bool As3933::setBitDuration(byte rcRatio)
 {
     if(--rcRatio>0x1F)
@@ -495,6 +494,12 @@ void As3933::reset()
 {
     write(PRESET_DEFAULT);
     _bCorrelatorEnabled=true;
+}
+
+// Clear wake state of chip / go back to listening mode
+void As3933::clear_wake()
+{
+    write(CLEAR_WAKE);
 }
 
 bool As3933::setWakeUpProtocol(WAKEUP wk)

@@ -106,6 +106,9 @@ public:
     bool setWakeUpProtocol(WAKEUP wk);
     bool setWakeUpPattern(byte* pattern16);
     void reset();
+    void clear_wake();
+    void write(byte reg, byte data);
+    byte read(byte reg);
 private:
     typedef enum
     {
@@ -117,8 +120,6 @@ private:
         Calib_RCO_LC=5
     }DIRECT_CMD;
     void write(DIRECT_CMD directCmd);
-    void write(byte reg, byte data);
-    byte read(byte reg);
     bool setOperatingFrequencyRange();
     const byte CLOCK_GEN_DIS=7;//R16.7
     const byte BAND_SEL2=7;//R8.7
