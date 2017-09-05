@@ -18,7 +18,6 @@ bool As3933::begin(unsigned long freq)
     _spi->begin();
     reset();
     //use default register values to check if communication is OK.
-    //error in datasheet: default values of R5 and R6 are swapped
     byte r5=read(5);
     byte r6=read(6);
     if((r5!=0x69) || (r6!= 0x96))
