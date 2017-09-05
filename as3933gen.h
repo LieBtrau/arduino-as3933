@@ -16,7 +16,7 @@ const byte RF_PERIOD_CTR=31; // = (#bits per RF period) - 1
 #ifdef ARDUINO_AVR_PROTRINKET3FTDI || defined(ARDUINO_AVR_PROTRINKET3)
     //Set compare match register for 125KHz output frequency = F_CPU / 125K - 1 = 12M / 125K - 1 (Pro Trinket 3V)
     const byte OCR1AVAL=95;
-#elif defined(ARDUINO_AVR_UNO)
+#elif defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO)
     //Set compare match register for 125KHz output frequency = F_CPU / 125K - 1 = 16M / 125K - 1 (Pro Trinket 3V)
     const byte OCR1AVAL=127;
 #elif defined (__AVR_ATmega168__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__)
