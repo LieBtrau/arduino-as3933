@@ -586,7 +586,7 @@ bool As3933::setWakeUpPattern(byte *pattern16)
     //The pattern passed into this function is symbol representation.  It corresponds to 32bits in Manchester.
     byte r0=read(0);
     bitSet(r0, PAT32);
-    write(r0);
+    write(0, r0);
     write(5, pattern16[0]);
     write(6, pattern16[1]);
     return true;
