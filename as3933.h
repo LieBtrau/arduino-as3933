@@ -111,7 +111,9 @@ private:
     {
         CLEAR_WAKE=0,
         RESET_RSSI=1,
-        PRESET_DEFAULT=2,
+        Calib_RCosc=2,
+        clear_false=3,
+        PRESET_DEFAULT=4,
         Calib_RCO_LC=5
     }DIRECT_CMD;
     void write(DIRECT_CMD directCmd);
