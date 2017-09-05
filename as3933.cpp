@@ -17,10 +17,12 @@ bool As3933::begin(unsigned long freq)
     _spiSettings=SPISettings(2000000, MSBFIRST, SPI_MODE1);
     _spi->begin();
     reset();
+    delay(300);
     //use default register values to check if communication is OK.
     //error in datasheet: default values of R5 and R6 are swapped
     byte r5=read(5);
     byte r6=read(6);
+    //h4w
     if((r5!=0x69) || (r6!= 0x96))
     {
         Serial.println("Reading data from AS3933 fails: ");
